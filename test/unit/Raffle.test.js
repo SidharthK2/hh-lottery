@@ -64,8 +64,8 @@ const {
             interval.toNumber() + 1,
           ]);
           await network.provider.send("evm_mine", []);
-          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep([]);
-          assert(!upkeepNeeded);
+          const { upKeepNeeded } = await raffle.callStatic.checkUpkeep([]);
+          assert(!upKeepNeeded);
         });
         it("returns false if raffle isn't open", async () => {
           await raffle.enterRaffle({ value: raffleEntranceFee });
@@ -75,18 +75,18 @@ const {
           await network.provider.send("evm_mine", []);
           await raffle.performUpkeep([]);
           const raffleState = await raffle.getRaffleState();
-          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep([]);
+          const { upKeepNeeded } = await raffle.callStatic.checkUpkeep([]);
           assert.equal(raffleState.toString(), "1");
-          assert.equal(upkeepNeeded, false);
+          assert.equal(upKeepNeeded, false);
         });
         it("returns false if enough time hasn't passed", async () => {
           await raffle.enterRaffle({ value: raffleEntranceFee });
           await network.provider.send("evm_increaseTime", [
-            interval.toNumber() - 1,
+            interval.toNumber() - 2,
           ]);
           await network.provider.request({ method: "evm_mine", params: [] });
-          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x"); // upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
-          assert(!upkeepNeeded);
+          const { upKeepNeeded } = await raffle.callStatic.checkUpkeep("0x"); // upKeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
+          assert(!upKeepNeeded);
         });
         it("returns true if enough time has passed, has players, eth, and is open", async () => {
           await raffle.enterRaffle({ value: raffleEntranceFee });
@@ -94,8 +94,8 @@ const {
             interval.toNumber() + 1,
           ]);
           await network.provider.request({ method: "evm_mine", params: [] });
-          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep([]); // upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
-          assert(upkeepNeeded);
+          const { upKeepNeeded } = await raffle.callStatic.checkUpkeep([]); // upKeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
+          assert(upKeepNeeded);
         });
       });
     });
