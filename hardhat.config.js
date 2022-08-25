@@ -27,7 +27,6 @@ module.exports = {
       accounts: [PRIVATE_KEY],
     },
   },
-  // solidity: "0.8.8",
   solidity: {
     compilers: [
       {
@@ -39,7 +38,7 @@ module.exports = {
     ],
   },
   mocha: {
-    timeout: 500000, // 500 seconds max for running tests
+    timeout: 500000,
   },
   namedAccounts: {
     deployer: {
@@ -48,5 +47,12 @@ module.exports = {
     player: {
       default: 1,
     },
+  },
+  gasReporter: {
+    enabled: false,
+    currency: "USD",
+    outputFile: "gas-report.txt",
+    noColors: true,
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
 };
