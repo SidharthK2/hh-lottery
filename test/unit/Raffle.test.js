@@ -98,4 +98,29 @@ const {
           assert(upkeepNeeded);
         });
       });
+      describe("performUpkeep", () => {
+        it("it can only run if checkUpkeep is true", async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send("evm_increaseTime", [
+            interval.toNumber() + 1,
+          ]);
+          await network.provider.send("evm_mine");
+          const tx = await raffle.performUpkeep([]);
+          assert(tx);
+        });
+        it("revert when check upkeep is false", async () => {
+          const raffleBalance = await ethers.provider.getBalance(
+            raffle.address
+          );
+          const numPlayers = await raffle.getNumberOfPlayers();
+          const raffleState = await raffle.getRaffleState();
+          await expect(raffle.performUpkeep([]))
+            .to.be.revertedWithCustomError(
+              raffle,
+              // `Raffle__UpkeepNotNeeded(${raffleBalance}, ${numPlayers}, ${raffleState})`
+              `Raffle__UpkeepNotNeeded`
+            )
+            .withArgs(raffleBalance, numPlayers, raffleState, "my error");
+        });
+      });
     });

@@ -9,10 +9,11 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 error Raffle__NotEnoughETHEntered();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
-error Raffle__UpKeepNotNeeded(
-    uint256 currebtBalance,
+error Raffle__UpkeepNotNeeded(
+    uint256 currentBalance,
     uint256 numPlayers,
-    uint256 raffleState
+    uint256 raffleState,
+    string errorString
 );
 
 /**
@@ -94,7 +95,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         view
         override
         returns (
-            bool upKeepNeeded,
+            bool upkeepNeeded,
             bytes memory /* performData */
         )
     {
@@ -102,7 +103,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval;
         bool hasPlayers = (s_players.length > 0);
         bool hasBalance = address(this).balance > 0;
-        upKeepNeeded = (isOpen && timePassed && hasBalance && hasPlayers);
+        upkeepNeeded = (isOpen && timePassed && hasBalance && hasPlayers);
     }
 
     function performUpkeep(
@@ -110,10 +111,11 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     ) external override {
         (bool upKeepNeeded, ) = checkUpkeep("");
         if (!upKeepNeeded) {
-            revert Raffle__UpKeepNotNeeded(
+            revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
                 s_players.length,
-                uint256(s_raffleState)
+                uint256(s_raffleState),
+                "my error"
             );
         }
         s_raffleState = RaffleState.CALCULATING;
