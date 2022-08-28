@@ -115,12 +115,69 @@ const {
           const numPlayers = await raffle.getNumberOfPlayers();
           const raffleState = await raffle.getRaffleState();
           await expect(raffle.performUpkeep([]))
-            .to.be.revertedWithCustomError(
-              raffle,
-              // `Raffle__UpkeepNotNeeded(${raffleBalance}, ${numPlayers}, ${raffleState})`
-              `Raffle__UpkeepNotNeeded`
-            )
+            .to.be.revertedWithCustomError(raffle, `Raffle__UpkeepNotNeeded`)
             .withArgs(raffleBalance, numPlayers, raffleState, "my error");
+        });
+        it("updates the raffle state, emits an event, and calls the vrf coordinator", async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send("evm_increaseTime", [
+            interval.toNumber() + 1,
+          ]);
+          await network.provider.send("evm_mine");
+          const txResponse = await raffle.performUpkeep([]);
+          const txReceipt = await txResponse.wait(1);
+          const requestId = txReceipt.events[1].args.requestId;
+          const raffleState = await raffle.getRaffleState();
+          assert(requestId.toNumber() > 0);
+          assert(raffleState.toString() == "1");
+        });
+      });
+      describe("fulfill randoms words", async () => {
+        beforeEach(async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send("evm_increaseTime", [
+            interval.toNumber() + 1,
+          ]);
+          await network.provider.send("evm_mine", []);
+        });
+        it("can only be called after perfromUpkeep", async () => {
+          await expect(
+            vrfCoordinatorV2Mock.fulfillRandomWords(0, raffle.address)
+          ).to.be.revertedWith("nonexistent request");
+          await expect(
+            vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address)
+          ).to.be.revertedWith("nonexistent request");
+        });
+        it("picks a winner, resets the lottery, and sends the money", async () => {
+          const additionalEntrants = 3;
+          const startingAccountIndex = 1;
+          const accounts = await ethers.getSigners();
+          for (
+            let i = startingAccountIndex;
+            i < startingAccountIndex + additionalEntrants;
+            i++
+          ) {
+            const accountConnectedRaffle = raffle.connect(accounts[i]);
+            await accountConnectedRaffle.enterRaffle({
+              value: raffleEntranceFee,
+            });
+          }
+          const startingTimeStamp = await raffle.getLastTimeStamp();
+          await new Promise(async (resolve, reject) => {
+            raffle.once("winnerPicked", () => {
+              try {
+              } catch (e) {
+                console.log(e);
+              }
+              resolve();
+            });
+            const tx = await raffle.performUpkeep([]);
+            txReceipt = await tx.wait(1);
+            await vrfCoordinatorV2Mock.fulfillRandomWords(
+              txReceipt.events[1].args.requestId,
+              raffle.address
+            );
+          });
         });
       });
     });

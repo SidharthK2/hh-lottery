@@ -104,7 +104,12 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         bool hasPlayers = (s_players.length > 0);
         bool hasBalance = address(this).balance > 0;
         upkeepNeeded = (isOpen && timePassed && hasBalance && hasPlayers);
+        return (upkeepNeeded, "0x0");
     }
+
+    /**
+     * @dev mocks the chainlink keeper node and perfrom upkeep for local chain
+     */
 
     function performUpkeep(
         bytes calldata /* performData */
@@ -170,7 +175,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         return s_players.length;
     }
 
-    function getLatestTimeStamp() public view returns (uint256) {
+    function getLastTimeStamp() public view returns (uint256) {
         return s_lastTimeStamp;
     }
 
