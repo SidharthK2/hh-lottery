@@ -164,7 +164,7 @@ const {
           }
           const startingTimeStamp = await raffle.getLastTimeStamp();
           await new Promise(async (resolve, reject) => {
-            raffle.once("winnerPicked", async () => {
+            raffle.once("WinnerPicked", async () => {
               console.log("found the event!");
               try {
                 const recentWinner = await raffle.getRecentWinner();
