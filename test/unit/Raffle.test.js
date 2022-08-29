@@ -164,10 +164,23 @@ const {
           }
           const startingTimeStamp = await raffle.getLastTimeStamp();
           await new Promise(async (resolve, reject) => {
-            raffle.once("winnerPicked", () => {
+            raffle.once("winnerPicked", async () => {
+              console.log("found the event!");
               try {
+                const recentWinner = await raffle.getRecentWinner();
+                console.log(recentWinner);
+                console.log(accounts[2]);
+                console.log(accounts[0]);
+                console.log(accounts[1]);
+                console.log(accounts[3]);
+                const raffleState = await raffle.getRaffleState();
+                const endingTimeStamp = await raffle.getLastTimeStamp();
+                const numPlayers = await raffle.getNumberOfPlayers();
+                assert.equal(numPlayers.toString(), "0");
+                assert.equal(raffleState.toString(), "0");
+                assert(endingTimeStamp > startingTimeStamp);
               } catch (e) {
-                console.log(e);
+                reject(e);
               }
               resolve();
             });
