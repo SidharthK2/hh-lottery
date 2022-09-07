@@ -27,7 +27,7 @@ async function updateContractAddresses() {
     fs.readFileSync(FRONTEND_ADDRESS_FILE, "utf-8")
   );
   if (chainId in currentAddresses) {
-    if (!contractAddress[chainId].includes(raffle.address)) {
+    if (!currentAddresses[chainId].includes(raffle.address)) {
       currentAddresses[chainId].push(raffle.address);
     }
   }
