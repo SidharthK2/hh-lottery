@@ -30,8 +30,7 @@ async function updateContractAddresses() {
     if (!currentAddresses[chainId].includes(raffle.address)) {
       currentAddresses[chainId].push(raffle.address);
     }
-  }
-  {
+  } else {
     currentAddresses[chainId] = [raffle.address];
   }
   fs.writeFileSync(FRONTEND_ADDRESS_FILE, JSON.stringify(currentAddresses));
