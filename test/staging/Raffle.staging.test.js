@@ -26,7 +26,7 @@ developmentChains.includes(network.name)
               try {
                 const recentWinner = await raffle.getRecentwinner();
                 const raffleState = await raffle.getRaffleState();
-                const winnerBalance = await accounts[0].getBalance();
+                const winnerEndingBalance = await accounts[0].getBalance();
                 const endingTimeStamp = await raffle.getLastTimeStamp();
 
                 await expect(raffle.getPlayer(0)).to.be.reverted;
